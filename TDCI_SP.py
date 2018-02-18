@@ -29,12 +29,8 @@ Lx = 15
 L  = 4.75
 hw = 1
 x  = np.linspace(-Lx,Lx,N+1)
-V  = np.zeros(len(x))
 dx = x[1]-x[0]
 l  = 1
-
-for i in range(0,len(x)):
-	V[i] = V_func(x[i],L)
 
 #Compute single-particle basis numerically
 H  = np.zeros((N-1,N-1))	
@@ -47,7 +43,6 @@ for i in range(0,N-1):
 
 
 eigval, eigvecs = np.linalg.eigh(H)
-
 eigvecs *= 1.0/np.sqrt(dx)
 
 print(eigval[0:3])
@@ -56,10 +51,16 @@ print(trapz(eigvecs[:,0]*eigvecs[:,0],x[1:N]))
 psi0    = np.zeros(N+1,dtype=np.complex128)
 psi_new = np.zeros(N+1,dtype=np.complex128)
 
-States = 3
+States = 2
 
 C    = np.zeros(States)
-C[0] = 1
+C_initial    = np.zeros(States)
+C[0] = 1.0/np.sqrt(2.0)
+C[1] = 1.0/np.sqrt(2.0)
+C_initial[0] = 1.0/np.sqrt(2.0)
+C_initial[1] = 1.0/np.sqrt(2.0)
+
+
 
 H0 = np.zeros((States,States))
 V  = np.zeros((States,States))
@@ -70,28 +71,35 @@ for i in range(0,States):
 		V[i,j] = np.trapz(eigvecs[:,i]*x[1:N]*eigvecs[:,j],x[1:N])
 
 print V
-sys.exit(1)
-Nt = 100000
-dt = 10**(-4)
+
+Nt = 5000
+dt = 10**(-3)
+
+Eps = 1
+Omega = eigval[1]-eigval[0]
 
 for i in range(1,Nt+1):
 
 	t = i*dt
-	#print t-dt
-	#Htilde = -1j*(H0+Laser(t-dt,Omega=eigval[3]-eigval[0])*V)
-	#C_new = np.dot(expm(dt*Htilde),C)
-	#C     = C_new
-	C     = C - 1j*dt*np.dot(H0+Laser(t-dt,eigval[1]-eigval[0])*V,C)
 
-	if(i%1000 == 0):	
-		psi_t = np.zeros(len(eigvecs[:,0]),dtype=np.complex128)
+	#print t-dt
+	Htilde = -1j*(H0+Laser(0,Omega=Omega)*V)
+	C_new = np.dot(expm(dt*Htilde),C)
+	C     = C_new
+	#C     = C - 1j*dt*np.dot(H0+Eps*np.sin(Omega*0)*V,C)
+
+	if(i%100 == 0):	
+		psi_t       = np.zeros(len(eigvecs[:,0]),dtype=np.complex128)
+		psi_exact_t = np.zeros(len(eigvecs[:,0]),dtype=np.complex128)
 		for j in range(0,States):
-			psi_t += C[j]*eigvecs[:,j]
+			psi_t       += C[j]*eigvecs[:,j]
+			psi_exact_t += C_initial[j]*eigvecs[:,j]*np.exp(-1j*eigval[j]*t)
 		print("Norm: ", abs(trapz(np.conj(psi_t)*psi_t,x[1:N]))**2, "t: ", t)
 		plt.figure(i)
 		plt.plot(x[1:N],np.abs(psi_t)**2,'-b')
+		plt.plot(x[1:N],np.abs(psi_exact_t)**2,'-r')
 		plt.plot(x[1:N],HarmonicOscillator(x[1:N],hw),'-y')
-		plt.plot(x[1:N],np.abs(eigvecs[:,0])**2,'-r')
-		plt.plot(x[1:N],np.abs(eigvecs[:,1])**2,'-g')
+		#plt.plot(x[1:N],np.abs(eigvecs[:,0])**2,'-r')
+		#plt.plot(x[1:N],np.abs(eigvecs[:,1])**2,'-g')
 		plt.axis([-Lx, Lx, 0, 1])
 		plt.savefig("data/WaveFunc_t=%.2f.png" % t)
