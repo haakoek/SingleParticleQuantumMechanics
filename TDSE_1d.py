@@ -54,22 +54,11 @@ for i in range(0,N-1):
 
 
 eigval, eigvecs = np.linalg.eigh(H)
-w0 = eigval[1]-eigval[0]
 
 eigvecs *= 1.0/np.sqrt(dx)
 
 print(eigval[0:3])
 print(trapz(eigvecs[:,0]*eigvecs[:,0],x[1:N]))
-
-w = 1
-
-e   = 1
-Eps = 1
-
-#tau_vec = np.linspace(0,10,100)
-#plt.plot(tau_vec, e**2 * Eps**2 * np.pi * tau_vec**2 * np.exp(-w**2*tau_vec**2/2) / (2*w)) 
-#plt.show()
-#sys.exit(1)
 
 psi0 = np.zeros(N+1,dtype=np.complex128)
 psi_new = np.zeros(N+1,dtype=np.complex128)
@@ -83,10 +72,6 @@ for i in range(0,N-1):
 
 #psi0[1:N] = (1.0/np.sqrt(2.0))*(eigvecs[:,0]+eigvecs[:,1])
 psi0[1:N] = eigvecs[:,0]
-#plt.plot(x,abs(psi0)**2,x,potential) #
-#plt.axis([-Lx, Lx, 0, 1])
-#plt.savefig("data/WaveFunc_t=0.0.png")
-#plt.axis([-Lx,Lx,0,0.1])
 
 dt = 10**(-2)
 Nt = 2000
@@ -98,8 +83,6 @@ transition_prob[0] = np.abs(trapz(eigvecs[:,1]*eigvecs[:,0],x[1:N]))**2
 for i in range(1,int(Nt)+2):
 	
     t = i*dt
-    #print("t: ",t)
-
     np.fill_diagonal(Ht,Laser(x[1:N],t))
 
     Htilde = -1j*(H+Ht)
