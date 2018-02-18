@@ -56,7 +56,7 @@ print(trapz(eigvecs[:,0]*eigvecs[:,0],x[1:N]))
 psi0    = np.zeros(N+1,dtype=np.complex128)
 psi_new = np.zeros(N+1,dtype=np.complex128)
 
-States = 4
+States = 3
 
 C    = np.zeros(States)
 C[0] = 1
@@ -70,20 +70,20 @@ for i in range(0,States):
 		V[i,j] = np.trapz(eigvecs[:,i]*x[1:N]*eigvecs[:,j],x[1:N])
 
 print V
-
-Nt = 40000
-dt = 10**(-3)
+sys.exit(1)
+Nt = 100000
+dt = 10**(-4)
 
 for i in range(1,Nt+1):
 
 	t = i*dt
 	#print t-dt
-	Htilde = -1j*(H0+Laser(t-dt,Omega=eigval[3]-eigval[0])*V)
-	C_new = np.dot(expm(dt*Htilde),C)
-	C     = C_new
-	#C = C - 1j*dt*np.dot(H0+Laser(0)*V,C)
+	#Htilde = -1j*(H0+Laser(t-dt,Omega=eigval[3]-eigval[0])*V)
+	#C_new = np.dot(expm(dt*Htilde),C)
+	#C     = C_new
+	C     = C - 1j*dt*np.dot(H0+Laser(t-dt,eigval[1]-eigval[0])*V,C)
 
-	if(i%100 == 0):	
+	if(i%1000 == 0):	
 		psi_t = np.zeros(len(eigvecs[:,0]),dtype=np.complex128)
 		for j in range(0,States):
 			psi_t += C[j]*eigvecs[:,j]
