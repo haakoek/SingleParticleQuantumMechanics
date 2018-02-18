@@ -11,7 +11,7 @@ def doubleWell(x,d=4,x0=0):
 	return (1.0/(2.0*d**2))*(x-x0-0.5*d)**2 * (x-x0+0.5*d)**2
 def AnHarmonicOscillator(x,hw,l):
 	return 0.5* x**2 * hw**2 + l*x**4
-def Laser(x,t,e=0.9,Eps=0.9,tau=2):
+def Laser(x,t,e=0.5,Eps=0.5,tau=6):
     return -x*e*Eps*np.exp(-t**2/tau**2)
     #return -A*np.cos(Omega*t)*x
 
@@ -66,10 +66,11 @@ w = 1
 e   = 1
 Eps = 1
 
-tau_vec = np.linspace(0,10,100)
-plt.plot(tau_vec, e**2 * Eps**2 * np.pi * tau_vec**2 * np.exp(-w**2*tau_vec**2/2) / (2*w)) 
-plt.show()
+#tau_vec = np.linspace(0,10,100)
+#plt.plot(tau_vec, e**2 * Eps**2 * np.pi * tau_vec**2 * np.exp(-w**2*tau_vec**2/2) / (2*w)) 
+#plt.show()
 #sys.exit(1)
+
 psi0 = np.zeros(N+1,dtype=np.complex128)
 psi_new = np.zeros(N+1,dtype=np.complex128)
 potential = np.zeros(len(x))
@@ -82,13 +83,17 @@ for i in range(0,N-1):
 
 #psi0[1:N] = (1.0/np.sqrt(2.0))*(eigvecs[:,0]+eigvecs[:,1])
 psi0[1:N] = eigvecs[:,0]
-plt.plot(x,abs(psi0)**2,x,potential) #
-plt.axis([-Lx, Lx, 0, 1])
-plt.savefig("data/WaveFunc_t=0.0.png")
+#plt.plot(x,abs(psi0)**2,x,potential) #
+#plt.axis([-Lx, Lx, 0, 1])
+#plt.savefig("data/WaveFunc_t=0.0.png")
 #plt.axis([-Lx,Lx,0,0.1])
 
 dt = 10**(-2)
-Nt = 1000
+Nt = 2000
+
+t_vec = np.linspace(0,Nt*dt,Nt+2)
+transition_prob    = np.zeros(Nt+2)
+transition_prob[0] = np.abs(trapz(eigvecs[:,1]*eigvecs[:,0],x[1:N]))**2
 
 for i in range(1,int(Nt)+2):
 	
@@ -97,11 +102,13 @@ for i in range(1,int(Nt)+2):
 
     np.fill_diagonal(Ht,Laser(x[1:N],t))
 
-	
     Htilde = -1j*(H+Ht)
     psi_new[1:N] = np.dot(expm(dt*Htilde),psi0[1:N])
     psi0 = psi_new
-	
+    transition_prob[i] = np.abs(trapz(eigvecs[:,1]*psi0[1:N],x[1:N]))**2    
+    
+    
+    """
     if(i%20==0):
 		#print (np.vdot(psi0,psi0))
         print (trapz(np.conj(psi0)*psi0,x), t)
@@ -109,3 +116,7 @@ for i in range(1,int(Nt)+2):
         plt.plot(x,abs(psi0)**2,x,potential) #doubleWell(x)
         plt.axis([-Lx, Lx, 0, 1])
         plt.savefig("data/WaveFunc_t=%g.png" % t)
+    """
+
+plt.plot(t_vec, transition_prob)
+plt.show()
