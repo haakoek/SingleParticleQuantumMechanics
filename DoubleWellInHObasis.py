@@ -108,7 +108,7 @@ for j in range(0,M):
 epsilon, C = scipy.linalg.eigh(H)
 print epsilon
 
-"""
+
 HO_pqrs = np.zeros((M, M, M, M))
 with open("Coulomb2d_L=72.dat", "r") as f:
     for row in f.read().split("\n"):
@@ -126,48 +126,3 @@ DW_pqrs = np.einsum('ap,bq,gr,ds,abgd->pqrs',C[0:M,0:L],C[0:M,0:L],C[0:M,0:L],C[
 
 with open("DWpqrs_spOrbs=%d.pkl" % L, "wb") as f:
     pickle.dump(DW_pqrs, f)
-
-
-states = index_map_spinfree(Nspstates, shellMax)
-d = M
-print("Single particle state: ", d, "Two particle states", d*(d+1)/2)
-
-M_min  = -2*shellMax
-M_max  =  2*shellMax
-M_vals = np.linspace(M_min,M_max,4*shellMax+1)
-
-
-MChannels = []
-for i in range(0,len(M_vals)):
-    MChannels.append([])
-
-count = 0
-for q in range(0,d):
-    nq, mq = states[q]
-    for r in range(0,d):
-        nr, mr = states[r]
-        M  = mq + mr
-        index = int(M_max-M) #Thus -M = index-M_max => M = M_max-index
-        count += 1
-        MChannels[index].append((r,q))
-
-lookupsSmart = 0
-t1 = time.time()
-for index in range(0,len(M_vals)):
-    currentChan = MChannels[index]
-    for state1 in currentChan:
-        #p, q = state1
-        #np, mp = states[p]
-        #nq, mq = states[q]
-        for state2 in currentChan:
-            lookupsSmart += 1
-            #r,s = state2
-            #nr, mr = states[r]
-            #ns, ms = states[s]
-t2 = time.time()
-
-print( d**4 * (t2-t1) / (3600) )
-
-print("#LookupsBruteForce: ", d**4, "LookupsChannels: ", lookupsSmart, "lB/lC: ", lookupsSmart/float(d**4))
-print(d**4)
-"""
