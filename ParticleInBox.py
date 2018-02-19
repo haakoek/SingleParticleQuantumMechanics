@@ -52,6 +52,7 @@ def propagate(t):
 	for j in range(0,M):
 		psi_t += Coeffecients[j]*Basis[:,j]*np.exp(-1j*(j+1)**2*w1*t)
 	line.set_ydata(np.abs(psi_t)**2)  # update the data
+	#time.set_text('time = %.2f' % t)
 	return line,
 
 # Init only required for blitting to give a clean slate.
